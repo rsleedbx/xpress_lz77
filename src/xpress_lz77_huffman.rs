@@ -227,9 +227,21 @@ fn lz77_huffman_decompress_chunk(
             offset = -offset;
 
             if length == 15 {
+                if bstr.index >= input.len() {
+                    return Err(Error::new(
+                        std::io::ErrorKind::UnexpectedEof,
+                        "EOF reading extra length byte",
+                    ));
+                }
                 length = input[bstr.index] as usize + 15;
                 bstr.index += 1;
                 if length == 270 {
+                    if bstr.index + 2 > input.len() {
+                        return Err(Error::new(
+                            std::io::ErrorKind::UnexpectedEof,
+                            "EOF reading 16-bit length",
+                        ));
+                    }
                     length =
                         u16::from_le_bytes([input[bstr.index], input[bstr.index + 1]]) as usize;
                     bstr.index += 2;
