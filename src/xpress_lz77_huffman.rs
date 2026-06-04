@@ -240,6 +240,9 @@ fn lz77_huffman_decompress_chunk(
 
             length += 3;
             while length > 0 {
+                if i >= output.len() {
+                    break; // truncate match at output boundary per MS-XCA §2.2
+                }
                 if (i as isize) + offset < 0 {
                     return Err(Error::new(
                         std::io::ErrorKind::InvalidData,
