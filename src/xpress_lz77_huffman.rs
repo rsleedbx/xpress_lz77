@@ -171,7 +171,9 @@ impl<'a> BitStream<'a> {
         self.bits -= n;
         if self.bits < 16 {
             if self.index + 2 > self.source.len() {
-                return Err(Error::new(std::io::ErrorKind::UnexpectedEof, "EOF Error"));
+                // MS-XCA §2.2: overread past end of input yields zero bits.
+                self.bits = 32;
+                return Ok(());
             }
             let shift: u32 =
                 u16::from_le_bytes([self.source[self.index], self.source[self.index + 1]]) as u32;
